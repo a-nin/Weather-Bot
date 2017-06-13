@@ -47,7 +47,7 @@ foreach ($events as $event) {
     //replyTextMessage($bot, $event->getReplyToken(), $event->getAddress() . '[' . $event->getLatitude() . ',' . $event->getLongitude() . ']');
 
     // Google APIにアクセスし緯度経度から住所を取得
-    $jsonString = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?language=ja&latlang=' . $event->getLatitude() . ',' . $event->getLongitude());
+    $jsonString = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?language=ja&latlng=' . $event->getLatitude() . ',' . $event->getLongitude());
     // 文字列を連想配列に変換
     $json = json_decode($jsonString, true);
     // 住所情報のみを取り出し
