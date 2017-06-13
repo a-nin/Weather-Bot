@@ -39,6 +39,7 @@ foreach ($events as $event) {
   //   continue;
   // }
   if ($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage) {
+    // 入力されたテキストを取得
     $location = $event->getText();
   }
   // LocationMessageクラスのインスタンスの場合
@@ -77,9 +78,6 @@ foreach ($events as $event) {
   }
     //continue;
 }
-
-// 入力されたテキストを取得
-$location = $event->getText();
 
 // 住所ID用変数
 $locationId;
