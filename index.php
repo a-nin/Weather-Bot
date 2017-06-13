@@ -44,9 +44,39 @@ foreach ($events as $event) {
   // LocationMessageクラスのインスタンスの場合
   else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
     // LocationMessageの内容を返す
-    replyTextMessage($bot, $event->getReplyToken(), $event->getAddress() . '[' . $event->getLatitude() . ',' . $event->getLongitude() . ']');
-    continue;
+    //replyTextMessage($bot, $event->getReplyToken(), $event->getAddress() . '[' . $event->getLatitude() . ',' . $event->getLongitude() . ']');
+
+    // Google APIにアクセスし緯度経度から住所を取得
+    $jsonString = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?language=ja&latlang' . $event->getLatitude() . ',' . $event->getLongitude());
+    // 文字列を連想配列に変換
+    $json = json_decode($jsonString, true);
+    // 住所情報のみを取り出し
+    $addressComponentArray = $json['results'][0]['address_components'];
+    // 要素をループで処理
+    foreach($addressComponentArray as $addressComponent) {
+      // 県名を取得
+      if(in_array('administrative_area_level_1', $addressComponent['types'])) {
+        $prefName = $addressComponent['long_name'];
+        break;
+      }
+    }
+    // 東京と大阪の場合他県と内容が違うので特別な処理
+  if($prefName == '東京都') {
+    $location = '東京';
+  } else if($prefName == '大阪府') {
+    $location = '大阪';
+  } else {
+    // 要素をループで処理
+    foreach ($addressComponentArray as $addressComponent) {
+      // 市名を取得
+      if(in_array('locality', $addressComponent['types']) && !in_array('ward', $addressComponent['types'])) {
+        $location = $addressComponent['long_name'];
+        break;
+      }
+    }
   }
+    //continue;
+}
 
 // 入力されたテキストを取得
 $location = $event->getText();
@@ -67,6 +97,10 @@ foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
 }
 // 一致するものがなければ
 if(empty($locationId)) {
+  // 位置情報が送られたときは件名を取得済みなのでそれを代入
+  if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+    $location = $prefName;
+  }
   // 候補の配列
   $suggestArray = array();
   // 県名を抽出しユーザーが入力した県名と比較
