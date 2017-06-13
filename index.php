@@ -34,8 +34,17 @@ foreach ($events as $event) {
     continue;
   }
   // TextMessageクラスのインスタンスでなければ処理をスキップ
-  if(!($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage)) {
-    error_log('Non text message has come');
+  // if(!($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage)) {
+  //   error_log('Non text message has come');
+  //   continue;
+  // }
+  if ($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage) {
+    $location = $event->getText();
+  }
+  // LocationMessageクラスのインスタンスの場合
+  else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+    // LocationMessageの内容を返す
+    replyTextMessage($bot, $event->getReplyToken(), $event->getAddress() . '[' . $event->getLatitude() . ',' . $event->getLongitude() . ']');
     continue;
   }
 
