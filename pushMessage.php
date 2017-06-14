@@ -10,13 +10,13 @@ $httpClient = new \LINE\LINEBot\HTTPClient\CurlHTTPClient(getenv('CHANNEL_ACCESS
 $bot = new \LINE\LINEBot($httpClient, ['channelSecret' => getenv('CHANNEL_SECRET')]);
 
 // あなたのユーザーIDを入力して下さい
-$userId = getenv('USER_ID');
+// $userId = getenv('USER_ID');
 $message = 'Hello Push API';
 
 // メッセージをユーザーID宛てにPush
-$response = $bot->pushMessage($userId, new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($message));
+$response = $bot->pushMessage(getenv('USER_ID'), new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($message));
 if (!$response->isSucceeded()) {
   error_log('Failed!'. $responce->getHTTPStatus . ' ' . $responce->getRawBody());
 }
 
- ?>
+?>
