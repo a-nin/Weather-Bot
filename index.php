@@ -169,7 +169,7 @@ foreach ($events as $event) {
   // 予報がそのほかの場合
   } else {
     // 天気情報と更新情報をまとめて返信
-    replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+    replyTextMessage($bot, $event->getReplyToken(), $json['description'] . PHP_EOL . PHP_EOL .
       '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
   }
 }
