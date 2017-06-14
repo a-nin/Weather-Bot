@@ -151,17 +151,17 @@ foreach ($events as $event) {
   //   '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
 
   // 予報が晴れの場合
-  if($json['forecast'][0]['telop'] == '晴れ') {
+  if($json['forecasts'][0]['telop'] == '晴れ') {
     // 天気情報、更新時刻、晴れのスタンプをまとめて送信
-    replyMultiMessage($bot, $event->getReplyToken(), new LINE\LINEBot\MessageBuilder\TextMessageBuilder(
+    replyMultiMessage($bot, $event->getReplyToken(), new \LINE\LINEBot\MessageBuilder\TextMessageBuilder(
       $json['description']['text'] . PHP_EOL .
       PHP_EOL . '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
       new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 513)
     );
   // 予報が雨の場合
-  } else if($json['forecast'][0]['telop'] == '雨') {
+  } else if($json['forecasts'][0]['telop'] == '雨') {
     // 天気情報、更新時刻、雨のスタンプをまとめて送信
-    replyMultiMessage($bot, $event->getReplyToken(), new LINE\LINEBot\MessageBuilder\TextMessageBuilder(
+    replyMultiMessage($bot, $event->getReplyToken(), new \LINE\LINEBot\MessageBuilder\TextMessageBuilder(
       $json['description']['text'] . PHP_EOL .
       PHP_EOL . '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
       new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 507)
@@ -169,8 +169,11 @@ foreach ($events as $event) {
   // 予報がそのほかの場合
   } else {
     // 天気情報と更新情報をまとめて返信
-    replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
-      '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
+    replyTextMessage($bot, $event->getReplyToken(), new \LINE\LINEBot\MessageBuilder\TextMessageBuilder(
+      $json['description']['text'] . PHP_EOL . PHP_EOL .
+      '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
+      new \LINE\LINEBot\MessageBuilder\ImageMessageBuilder('https://' . $_SERVER['HTTP_HOST'] . '/imgs/original.jpg', 'https://' . $_SERVER['HTTP_HOST'] . '/imgs/preview.jpg')
+    );
   }
 }
 
