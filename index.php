@@ -41,9 +41,9 @@ foreach ($events as $event) {
   if ($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage) {
     // 入力されたテキストを取得
     $location = $event->getText();
-  }
+
   // LocationMessageクラスのインスタンスの場合
-  else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+  ｝else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
     // LocationMessageの内容を返す
     //replyTextMessage($bot, $event->getReplyToken(), $event->getAddress() . '[' . $event->getLatitude() . ',' . $event->getLongitude() . ']');
 
@@ -61,121 +61,120 @@ foreach ($events as $event) {
         break;
       }
     }
-    // 東京と大阪の場合他県と内容が違うので特別な処理
-  if($prefName == '東京都') {
-    $location = '東京';
-  } else if($prefName == '大阪府') {
-    $location = '大阪';
-  } else {
-    // 要素をループで処理
-    foreach ($addressComponentArray as $addressComponent) {
-      // 市名を取得
-      if(in_array('locality', $addressComponent['types']) && !in_array('ward', $addressComponent['types'])) {
-        $location = $addressComponent['long_name'];
-        break;
-      }
-    }
-  }
-    //continue;
-}
-
-// 住所ID用変数
-$locationId;
-// XMLファイルをパースするクラス
-$client = new Goutte\Client();
-// XMLファイルを取得
-$crawler = $client->request('GET', 'http://weather.livedoor.com/forecast/rss/primary_area.xml');
-// 市名のみを抽出しユーザーが入力した市名と比較
-foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
-  // 一致すれば住所IDを取得し処理を抜ける
-  if($city->getAttribute('title') == $location || $city->getAttribute('title') . "市" == $location) {
-    $locationId = $city->getAttribute('id');
-    break;
-  }
-}
-// 一致するものがなければ
-if(empty($locationId)) {
-  // 位置情報が送られたときは件名を取得済みなのでそれを代入
-  if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
-    $location = $prefName;
-  }
-  // 候補の配列
-  $suggestArray = array();
-  // 県名を抽出しユーザーが入力した県名と比較
-  foreach($crawler->filter('channel ldWeather|source pref') as $pref) {
-    // 一致すれば
-    if(strpos($pref->getAttribute('title'), $location) !== false) {
-      // その県に属する市を配列に追加
-      foreach($pref->childNodes as $child) {
-        if($child instanceof DOMElement && $child->nodeName == 'city') {
-          array_push($suggestArray, $child->getAttribute('title'));
+      // 東京と大阪の場合他県と内容が違うので特別な処理
+    if($prefName == '東京都') {
+      $location = '東京';
+    } else if($prefName == '大阪府') {
+      $location = '大阪';
+    } else {
+      // 要素をループで処理
+      foreach ($addressComponentArray as $addressComponent) {
+        // 市名を取得
+        if(in_array('locality', $addressComponent['types']) && !in_array('ward', $addressComponent['types'])) {
+          $location = $addressComponent['long_name'];
+          break;
         }
       }
+    }
+      //continue;
+  }
+
+  // 住所ID用変数
+  $locationId;
+  // XMLファイルをパースするクラス
+  $client = new Goutte\Client();
+  // XMLファイルを取得
+  $crawler = $client->request('GET', 'http://weather.livedoor.com/forecast/rss/primary_area.xml');
+  // 市名のみを抽出しユーザーが入力した市名と比較
+  foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
+    // 一致すれば住所IDを取得し処理を抜ける
+    if($city->getAttribute('title') == $location || $city->getAttribute('title') . "市" == $location) {
+      $locationId = $city->getAttribute('id');
       break;
     }
   }
-  // 候補が存在する場合
-  if(count($suggestArray) > 0) {
-    // アクションの配列
-    $actionArray = array();
-    // 候補をすべてアクションにして追加
-    foreach($suggestArray as $city) {
-      array_push($actionArray, new \LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder ($city, $city));
+  // 一致するものがなければ
+  if(empty($locationId)) {
+    // 位置情報が送られたときは件名を取得済みなのでそれを代入
+    if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+      $location = $prefName;
     }
-    // Buttonsテンプレートを返信
-    $builder = new \LINE\LINEBot\MessageBuilder\TemplateMessageBuilder(
-      '見つかりませんでした。',
-      new \LINE\LINEBot\MessageBuilder\TemplateBuilder\ButtonTemplateBuilder (
-                          '見つかりませんでした',
-                          'もしかして？', null, $actionArray));
-      $bot->replyMessage($event->getReplyToken(), $builder
+    // 候補の配列
+    $suggestArray = array();
+    // 県名を抽出しユーザーが入力した県名と比較
+    foreach($crawler->filter('channel ldWeather|source pref') as $pref) {
+      // 一致すれば
+      if(strpos($pref->getAttribute('title'), $location) !== false) {
+        // その県に属する市を配列に追加
+        foreach($pref->childNodes as $child) {
+          if($child instanceof DOMElement && $child->nodeName == 'city') {
+            array_push($suggestArray, $child->getAttribute('title'));
+          }
+        }
+        break;
+      }
+    }
+    // 候補が存在する場合
+    if(count($suggestArray) > 0) {
+      // アクションの配列
+      $actionArray = array();
+      // 候補をすべてアクションにして追加
+      foreach($suggestArray as $city) {
+        array_push($actionArray, new \LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder ($city, $city));
+      }
+      // Buttonsテンプレートを返信
+      $builder = new \LINE\LINEBot\MessageBuilder\TemplateMessageBuilder(
+        '見つかりませんでした。',
+        new \LINE\LINEBot\MessageBuilder\TemplateBuilder\ButtonTemplateBuilder (
+                            '見つかりませんでした',
+                            'もしかして？', null, $actionArray));
+        $bot->replyMessage($event->getReplyToken(), $builder
+      );
+
+    // 候補が存在しない場合
+   } else {
+      // 正しい入力方法を返信
+      replyTextMessage($bot, $event->getReplyToken(), '入力された地名が見つかりませんでした。市を入力して下さい。');
+    }
+    // 以降の処理はスキップ
+    continue;
+  }
+
+  // 住所IDが取得できた場合その住所の天気情報を取得
+  $jsonString = file_get_contents('http://weather.livedoor.com/forecast/webservice/json/v1?city=' . $locationId);
+  // 文字列を連想配列に変換
+  $json = json_decode($jsonString, true);
+  // 形式を指定して天気の更新時刻をパース
+  $date = date_parse_from_format('Y-m-d\TH:i:sP', $json['description']['publicTime']);
+  // 天気情報と更新時刻をまとめて返信
+  // replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+  //   '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
+
+  // 予報が晴れの場合
+  if($json['forecast'][0]['telop'] == '晴れ') {
+    // 天気情報、更新時刻、晴れのスタンプをまとめて送信
+    replyMultiMessage($bot, $event->getReplyToken(), new LINE\LINEBot\MessageBuilder\TextMessageBuilder(
+      $json['description']['text'] . PHP_EOL .
+      PHP_EOL . '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
+      new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 513)
     );
+  // 予報が雨の場合
+  } else if($json['forecast'][0]['telop'] == '雨') {
+    // 天気情報、更新時刻、雨のスタンプをまとめて送信
+    replyMultiMessage($bot, $event->getReplyToken(), new LINE\LINEBot\MessageBuilder\TextMessageBuilder(
+      $json['description']['text'] . PHP_EOL .
+      PHP_EOL . '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
+      new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 507)
+    );
+  // 予報がそのほかの場合
+  } else {
+    // 天気情報と更新情報をまとめて返信
+    replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+      '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
   }
-  // 候補がぞんざいしない場合
-  else {
-    // 正しい入力方法を返信
-    replyTextMessage($bot, $event->getReplyToken(), '入力された地名が見つかりませんでした。市を入力して下さい。');
-  }
-  // 以降の処理はスキップ
-  continue;
 }
 
-// 住所IDが取得できた場合その住所の天気情報を取得
-$jsonString = file_get_contents('http://weather.livedoor.com/forecast/webservice/json/v1?city=' . $locationId);
-// 文字列を連想配列に変換
-$json = json_decode($jsonString, true);
-// 形式を指定して天気の更新時刻をパース
-$date = date_parse_from_format('Y-m-d\TH:i:sP', $json['description']['publicTime']);
-// 天気情報と更新時刻をまとめて返信
-// replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
-//   '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
 
-// 予報が晴れの場合
-if($json['forecast'][0]['telop'] == '晴れ') {
-  // 天気情報、更新時刻、晴れのスタンプをまとめて送信
-  replyMultiMessage($bot, $event->getReplyToken(), new LINE\LINEBot\MessageBuilder\TextMessageBuilder(
-    $json['description']['text'] . PHP_EOL .
-    PHP_EOL . '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
-    new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 513)
-  );
-// 予報が雨の場合
-} else if($json['forecast'][0]['telop'] == '雨') {
-  // 天気情報、更新時刻、雨のスタンプをまとめて送信
-  replyMultiMessage($bot, $event->getReplyToken(), new LINE\LINEBot\MessageBuilder\TextMessageBuilder(
-    $json['description']['text'] . PHP_EOL .
-    PHP_EOL . '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
-    new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 507)
-  );
-// 予報がそのほかの場合
-} else {
-  // 天気情報と更新情報をまとめて返信
-  replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
-    '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
-}
-
-}
-
-}
 
 // テキストを返信。引数はLINEBot、返信先、テキスト
 function replyTextMessage($bot, $replyToken, $text) {
