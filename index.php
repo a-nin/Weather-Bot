@@ -28,6 +28,8 @@ try {
 
 // 配列に格納された各イベントをループ処理
 foreach ($events as $event) {
+  // ゆーざーID を表示
+  error_log($event->getUserId());
   // MessageEventクラスのインスタンスでなければ処理をスキップ
   if (!($event instanceof \LINE\LINEBot\Event\MessageEvent)) {
     error_log('Non message event has come');
