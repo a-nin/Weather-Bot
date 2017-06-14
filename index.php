@@ -169,10 +169,8 @@ foreach ($events as $event) {
   // 予報がそのほかの場合
   } else {
     // 天気情報と更新情報をまとめて返信
-    replyTextMessage($bot, $event->getReplyToken(), new \LINE\LINEBot\MessageBuilder\TextMessageBuilder(
-      $json['description']['text'] . PHP_EOL . PHP_EOL .
-      '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])),
-      new \LINE\LINEBot\MessageBuilder\ImageMessageBuilder('https://' . $_SERVER['HTTP_HOST'] . '/imgs/original.jpg', 'https://' . $_SERVER['HTTP_HOST'] . '/imgs/preview.jpg')
+    replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+      '最終更新：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute'])
     );
   }
 }
