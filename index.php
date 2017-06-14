@@ -139,7 +139,16 @@ if(empty($locationId)) {
   // 以降の処理はスキップ
   continue;
 }
-replyTextMessage($bot, $event->getReplyToken(), $location . 'の住所IDは' . $locationId . 'です。');
+
+// 住所IDが取得できた場合その住所の天気情報を取得
+$jsonString = file_get_contents('http://weather.livedoor.com/forecast/webservice/json/v1?city=' . $locationId);
+// 文字列を連想配列に変換
+$json = json_decode($jsonString, true);
+// 形式を指定して天気の更新時刻をパース
+$date = date_parse_from_format('Y-m-d\TH:i:sP', $json['description']['publicTime']);
+// 天気情報と更新時刻をまとめて返信
+replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+  '更新情報：' . sprintf('%s月%s日%s時%s分', $data['month'], $data['day'], $data['hour'], $data['minute']));
 
 }
 
