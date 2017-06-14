@@ -43,7 +43,7 @@ foreach ($events as $event) {
     $location = $event->getText();
 
   // LocationMessageクラスのインスタンスの場合
-  ｝else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+  } else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
     // LocationMessageの内容を返す
     //replyTextMessage($bot, $event->getReplyToken(), $event->getAddress() . '[' . $event->getLatitude() . ',' . $event->getLongitude() . ']');
 
